@@ -22,8 +22,9 @@
     <script>
         var room_id = {{ room_id|safe }}
         const myPeer = new Peer(undefined, {
-            host: '/',
-            port: '3001'
+            host: 'localhost',
+            port: '9000',
+            path: '/myapp' 
         })
         var peers = [];
         myPeer.on('open',id=>{

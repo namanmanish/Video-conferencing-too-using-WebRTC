@@ -1,0 +1,27 @@
+version: '3.5'
+
+networks:
+    appnet:
+        driver: bridge
+
+services:
+    webapp:
+        image: webrtcporject
+        ports:
+            - "8000:8000"
+        networks:
+            - appnet
+        volumes:
+            - /home/naman/code/Video-conferencing-too-using-WebRTC/:/home/WebRTC
+
+    redis:
+        image: redis:5
+        networks:
+            - appnet
+
+    peerjs:
+        image: peerjs/peerjs-server
+        ports:
+            - "9000:9000"
+        networks:
+            - appnet

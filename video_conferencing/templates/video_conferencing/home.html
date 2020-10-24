@@ -2,25 +2,143 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Video Chat Room</title>
+    <title>Video Chat Room </title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+
+
+
+    <script src="https://kit.fontawesome.com/c939d0e917.js"></script>
+
     <style>
-    #video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, 300px);
-      grid-auto-rows: 300px;
-    }
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            overflow-y: hidden;
+        }
+        
+        .bottom-bar button {
+            margin: 12px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            border: none;
+            color: #202124;
+            box-shadow: 0 4px 8px 0 black;
+            -webkit-transition-duration: 0.3s;
+        }
+        
+        .bottom-bar button:hover {
+            border: 3px solid white;
+            background-color: #202124;
+            color: white;
+            box-shadow: 0 8px 16px 0 black;
+            transform: scale(1.1);
+        }
+        
+        .bottom-bar .btn-sec {
+            background-color: #D33D2B;
+            box-shadow: 0 4px 8px 0 black;
+            color: white;
+            -webkit-transition-duration: 0.3s;
+        }
+        
+        .bottom-bar .btn-sec:hover {
+            background-color: #ac3426;
+            box-shadow: 0 8px 16px 0 black;
+            transform: scale(1.1);
+        }
+        
+        video {
+            height: 300px;
+            width: 400px;
+            margin: 10px;
+            box-shadow: 0 10px 20px 0 rgba(0,0,0,0.2);
+        }
+        
+        .main-window {
+            background-color: #202124;
+            color: white;
+            width: 100vw;
+            float: right;
+            transition: 0.5s;
+            overflow-x: hidden;
+            overflow-y: hidden;
+        }
+        
+        .videos-section {
+            background-color: #202124;
+            height: 90vh;
+            text-align: center;
+            overflow-y: scroll;
+        }
+        
+        .bottom-bar {
+            background-color: #262828;
+            color: #17252a;
+            height: 10vh;
+            text-align: center;
+            box-shadow: 0px -4px 5px  rgba(0,0,0,0.2);
+        }
+        
+        
+        
+        
+        
+    
   </style>
 </head>
 <body>
-    <div id="video-grid"></div>
+
+    <div id="main-window" class="main-window">
+        <div class="videos-section">
+            <div id="video-grid">
+
+            </div>
+        </div>
+        <div class="bottom-bar">
+
+            <div class="container">
+                <button onclick="toggleNav()" style="display: inline-block;"><i class="fa fa-comment"
+                        aria-hidden="true"></i></button>
+
+                <div class="main__video_button" style="display: inline-block;">
+                    <button onclick="playStop()"><i class="fas fa-video"></i></button>
+                </div>
+
+                <div class="main__video_button" style="display: inline-block;">
+                    <a href="/"><button class="btn-sec"><i class="fa fa-sign-out" aria-hidden="true"></i></button></a>
+                </div>
+
+                <div class="main__mute_button" style="display: inline-block;">
+                    <button onclick="muteUnmute()"><i class="fas fa-microphone"></i></button>
+                </div>
+
+                <div style="display: inline-block;">
+                    <button onclick="openInvitePanel();"><i class="fa fa-user-plus" aria-hidden="true"></i></button>
+                </div>
+
+            </div>
+        </div>
+
+    
+
+
+
+
+
+
+
+
+
+
     <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
     <script>
-        var room_id = {{ room_id|safe }}
+        var room_id = {{ room_id|safe }};
         const myPeer = new Peer(undefined, {
             host: 'localhost',
             port: '9000',
@@ -36,9 +154,9 @@
                 else
                     x += id[i];
             }
-            var endpoint = 'ws://' + window.location.host + '/ws/' + room_id + '/' + x + '/'
-            var socket = new WebSocket(endpoint)
-            var myVideo = document.createElement('video')
+            var endpoint = 'ws://' + window.location.host + '/ws/' + room_id + '/' + x + '/';
+            var socket = new WebSocket(endpoint);
+            var myVideo = document.createElement('video');
             myVideo.muted = true
             navigator.mediaDevices.getUserMedia({
               video: true,
@@ -94,5 +212,14 @@
             peers[rec_id] = call;
         }
     </script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
 </body>
 </html>

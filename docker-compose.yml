@@ -6,13 +6,13 @@ networks:
 
 services:
     webapp:
-        image: a191f62c39bd
+        image: webrtcporject
         ports:
             - "8000:8000"
         networks:
             - appnet
         volumes:
-            - /home/shuddhatm/Video-conferencing-too-using-WebRTC/:/home/WebRTC
+            - /home/naman/code/Video-conferencing-too-using-WebRTC/:/home/WebRTC
 
     redis:
         image: redis:5

@@ -205,25 +205,24 @@
             if(is_sharing)
                 myPeer.call(rec_id,myScreenStream)
         }
-        function shareScreen()
+        async function shareScreen()
         {
-            navigator.mediaDevices.getDisplayMedia().then(stream => {
-                is_sharing = true
-                myScreenStream = stream
-                var video_element = document.createElement('video')
-                video_element.setAttribute("id","screenShare")
-                addVideoStream(video_element,stream)
-                for(var key in peers)
-                    myPeer.call(key,stream)
-                stream.getVideoTracks()[0].onended = function () {
-                    is_sharing = false
-                    var element = document.getElementById("screenShare")
-                    element.remove()
-                    socket.send(JSON.stringify({
-                        'id': user_id
-                    }))
-                }
-            })
+            const stream = await navigator.mediaDevices.getDisplayMedia()
+            is_sharing = true
+            myScreenStream = stream
+            var video_element = document.createElement('video')
+            video_element.setAttribute("id","screenShare")
+            addVideoStream(video_element,stream)
+            for(var key in peers)
+                myPeer.call(key,stream)
+            stream.getVideoTracks()[0].onended = function () {
+                is_sharing = false
+                var element = document.getElementById("screenShare")
+                element.remove()
+                socket.send(JSON.stringify({
+                    'id': user_id
+                }))
+            }
         }
         function muteUnmute()
         {

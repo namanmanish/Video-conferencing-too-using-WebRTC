@@ -8,8 +8,8 @@ RUN apk update  \
     && virtualenv webrtcenv \
     && source webrtcenv/bin/activate \
     && pip install Django==2.2 \
-    && pip install channels \
-    && pip install channels_redis
+    && pip install channels==2.4 \
+    && pip install channels_redis==3.1
 EXPOSE 8000
 WORKDIR /home/
 RUN mkdir WebRTC

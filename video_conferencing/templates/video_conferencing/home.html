@@ -97,9 +97,10 @@
     <script>
         var room_id = {{ room_id|safe }};
         const myPeer = new Peer(undefined, {
-            host: 'localhost',
-            port: '9000',
-            path: '/myapp'
+            host: 'peerwebrtc.herokuapp.com',
+            port: '443',
+            secure: true,
+            path: '/'
         })
         var is_sharing = false
         var peers = [];
@@ -128,7 +129,7 @@
                 myVideoStream = stream
                 addVideoStream(myVideo, stream)
                 myPeer.on('call',call => {
-                    // console.log(call)
+                    console.log(call)
                     if(call.peer in peers)
                     {
                         // console.log(call)
@@ -151,6 +152,7 @@
                     }
                 })
                 socket.onmessage = function(e) {
+                    // console.log(e)
                     var data = JSON.parse(e.data);
                     var y = data.obj.id;
                     var rec_id = '';
@@ -196,6 +198,10 @@
         function ConnectToUser(stream,rec_id)
         {
             var call = myPeer.call(rec_id,stream)
+            // console.log(call)
+            call.on("error", function (err) {
+              console.error(err);
+            });
             var video_element = document.createElement('video')
             video_element.setAttribute("id",rec_id)
             call.on('stream',rec_stream => {

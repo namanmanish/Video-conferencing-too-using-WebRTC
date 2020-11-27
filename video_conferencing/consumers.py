@@ -11,7 +11,7 @@ class ConnectConsumer(WebsocketConsumer):
             self.room_id,
             {
                 'type': 'connection_message',
-                'obj': {'id':self.user_id,'type':1}
+                'obj': {'name':self.user_id,'type':'joined'}
             }
         )
         async_to_sync(self.channel_layer.group_add)(
@@ -25,7 +25,7 @@ class ConnectConsumer(WebsocketConsumer):
             self.room_id,
             {
                 'type': 'connection_message',
-                'obj': {'id':self.user_id,'type':0}
+                'obj': {'id':self.user_id,'type':'left'}
             }
         )
         async_to_sync(self.channel_layer.group_discard)(
@@ -35,12 +35,11 @@ class ConnectConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        id = text_data_json['id']
         async_to_sync(self.channel_layer.group_send)(
             self.room_id,
             {
                 'type': 'connection_message',
-                'obj': {'id':id,'type':2}
+                'obj': text_data_json
             }
         )
 

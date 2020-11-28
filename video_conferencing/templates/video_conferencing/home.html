@@ -15,7 +15,7 @@
 <script>
 	var targetUsername = null
 	var candidates = []
-	var room_id = {{ room_id|safe }}
+	var room_id = "{{ room_id|safe }}"
 	var user_name = "{{ user_name|safe }}"
 	var endpoint = 'ws://' + window.location.host + '/ws/' + room_id + '/' + user_name + '/'
 	socket = new WebSocket(endpoint)
@@ -32,17 +32,15 @@
 			handleVideoOfferMsg(data)
 		else if(data.type === "new-ice-candidate" && data.target === user_name)
 			handleNewICECandidateMsg(data)
-		else  if(data.target === user_name)
+		else  if(data.type === "video-answer" && data.target === user_name)
 			handleAnswerMsg(data)
 	}
-	function invite(data)
+	async function invite(data)
 	{
 		targetUsername = data.name;
     	createPeerConnection();
-		navigator.mediaDevices.getUserMedia(mediaConstraints)
-		.then(function(localStream) {
-			localStream.getTracks().forEach(track => myPeerConnection.addTrack(track, localStream));
-		})
+		localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints)
+		localStream.getTracks().forEach(track => myPeerConnection.addTrack(track, localStream));
 	}
 	function createPeerConnection()
 	{
@@ -55,67 +53,48 @@
   		});
 		myPeerConnection.onicecandidate = handleICECandidateEvent;
 		myPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent;
-		myPeerConnection.ontrack = handleRemoteStream;
+		myPeerConnection.ontrack = handleRemoteStreamEvent;
 	}
-	function handleNegotiationNeededEvent() 
+	async function handleNegotiationNeededEvent() 
 	{
-		navigator.mediaDevices.getUserMedia(mediaConstraints)
-		.then(function(localStream) {
-			addVideoStream(localStream)
-		})
-		myPeerConnection.createOffer().then(function(offer) {
-			return myPeerConnection.setLocalDescription();
-		})
-		.then(function() {
-			socket.send(JSON.stringify({
-				"name": user_name,
-				"target": targetUsername,
-				"type": "video-offer",
-				"sdp": myPeerConnection.localDescription
-			}))
-		})
+		localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints)
+		addVideoStream(localStream)
+		await myPeerConnection.createOffer()
+		await myPeerConnection.setLocalDescription();
+		socket.send(JSON.stringify({
+			"name": user_name,
+			"target": targetUsername,
+			"type": "video-offer",
+			"sdp": myPeerConnection.localDescription
+		}))
 	}
 	async function handleAnswerMsg(msg)
 	{
 		var desc = new RTCSessionDescription(msg.sdp)
 		await myPeerConnection.setRemoteDescription(desc)
-		for (index = 0; index < candidates.length; index++)
-		{ 
-			myPeerConnection.addIceCandidate(candidates[index])
-		}
+		candidates.forEach(candidate => myPeerConnection.addIceCandidate(candidate))
 	} 
-	async function handleVideoOfferMsg(msg) {
+	async function handleVideoOfferMsg(msg) 
+	{
 		var localStream = null;
 		targetUsername = msg.name;
 		var desc = new RTCSessionDescription(msg.sdp);
 		createPeerConnection();
 		await myPeerConnection.setLocalDescription()
-		myPeerConnection.setRemoteDescription(desc).then(function () {
-			for (index = 0; index < candidates.length; index++)
-			{ 
-    			myPeerConnection.addIceCandidate(candidates[index])
-			} 
-			return navigator.mediaDevices.getUserMedia(mediaConstraints)
-		})
-		.then(function(stream) {
-			localStream = stream;
-			addVideoStream(localStream);
-			localStream.getTracks().forEach((track) => {myPeerConnection.addTrack(track, localStream)});
-		})
-		.then(function() {
-			return myPeerConnection.createAnswer();
-		})
-		.then(function(answer) {
-			return myPeerConnection.setLocalDescription(answer);
-		})
-		.then(function() {
-			socket.send(JSON.stringify({
-				"name": user_name,
-				"target": targetUsername,
-				"type": "video-answer",
-				"sdp": myPeerConnection.localDescription
-            }))
-		})
+		await myPeerConnection.setRemoteDescription(desc)
+		candidates.forEach(candidate => myPeerConnection.addIceCandidate(candidate))
+		stream = await navigator.mediaDevices.getUserMedia(mediaConstraints)
+		localStream = stream;
+		addVideoStream(localStream);
+		await localStream.getTracks().forEach(track => myPeerConnection.addTrack(track, localStream));
+		answer = await myPeerConnection.createAnswer();
+		await myPeerConnection.setLocalDescription(answer);
+		socket.send(JSON.stringify({
+			"name": user_name,
+			"target": targetUsername,
+			"type": "video-answer",
+			"sdp": myPeerConnection.localDescription
+		}))
 	}
 	function handleICECandidateEvent(event) 
 	{
@@ -136,11 +115,12 @@
 		else
 			myPeerConnection.addIceCandidate(candidate)
 	}
-	function handleRemoteStream(event)
+	function handleRemoteStreamEvent(event)
 	{
 		addVideoStream(event.streams[0])
 	}
-	function addVideoStream(stream) {
+	function addVideoStream(stream) 
+	{
 		const video = document.createElement('video')
 		const videoGrid = document.getElementById('video-grid')
 		video.srcObject = stream

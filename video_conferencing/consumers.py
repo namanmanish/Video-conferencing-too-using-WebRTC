@@ -25,7 +25,7 @@ class ConnectConsumer(WebsocketConsumer):
             self.room_id,
             {
                 'type': 'connection_message',
-                'obj': {'id':self.user_id,'type':'left'}
+                'obj': {'name':self.user_id,'type':'left'}
             }
         )
         async_to_sync(self.channel_layer.group_discard)(

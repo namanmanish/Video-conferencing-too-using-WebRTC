@@ -1,28 +1,100 @@
-<div id="video-grid"></div>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://kit.fontawesome.com/c939d0e917.js"></script>
 <style>
-    #video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, 300px);
-      grid-auto-rows: 300px;
-    }
-    
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            overflow-y: hidden;
+        }
+        .bottom-bar button {
+            margin: 12px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            border: none;
+            color: #202124;
+            box-shadow: 0 4px 8px 0 black;
+            -webkit-transition-duration: 0.3s;
+        }
+        .bottom-bar button:hover {
+            border: 3px solid white;
+            background-color: #202124;
+            color: white;
+            box-shadow: 0 8px 16px 0 black;
+            transform: scale(1.1);
+        }
+        .bottom-bar .btn-sec {
+            background-color: #D33D2B;
+            box-shadow: 0 4px 8px 0 black;
+            color: white;
+            -webkit-transition-duration: 0.3s;
+        }
+        .bottom-bar .btn-sec:hover {
+            background-color: #ac3426;
+            box-shadow: 0 8px 16px 0 black;
+            transform: scale(1.1);
+        }
+        video {
+            height: 300px;
+            width: 400px;
+            margin: 10px;
+            box-shadow: 0 10px 20px 0 rgba(0,0,0,0.2);
+        }
+        .main-window {
+            background-color: #202124;
+            color: white;
+            width: 100vw;
+            float: right;
+            transition: 0.5s;
+            overflow-x: hidden;
+            overflow-y: hidden;
+        }
+        .videos-section {
+            background-color: #202124;
+            height: 90vh;
+            text-align: center;
+            overflow-y: scroll;
+        }
+        .bottom-bar {
+            background-color: #262828;
+            color: #17252a;
+            height: 10vh;
+            text-align: center;
+            box-shadow: 0px -4px 5px  rgba(0,0,0,0.2);
+        }
 </style>
+<div id="main-window" class="main-window">
+	<div class="videos-section">
+		<div id="video-grid">
+		</div>
+	</div>
+	<div class="bottom-bar">
+		<div class="container">
+			<div class="main__video_button" style="display: inline-block;">
+				<button onclick="playStop()"><i class="fas fa-video"></i></button>
+			</div>
+			<div class="main__mute_button" style="display: inline-block;">
+				<button onclick="muteUnmute()"><i class="fas fa-microphone"></i></button>
+			</div>
+		</div>
+	</div>
+</div>
 <script>
-	var targetUsername = null
+	var localStream = null;
 	var hasstarted = false
 	var alreadyrecieved = []
+	var videoalreadyadded = []
 	var conntetedpeers = {}
 	var room_id = "{{ room_id|safe }}"
 	var user_name = "{{ user_name|safe }}"
-	var endpoint = 'wss://' + window.location.host + '/ws/' + room_id + '/' + user_name + '/'
+	var endpoint = 'ws://' + window.location.host + '/ws/' + room_id + '/' + user_name + '/'
 	socket = new WebSocket(endpoint)
 	var mediaConstraints = {
-		audio: false, 
+		audio: true, 
 		video: true 
 	};
 	socket.onmessage = function(e) {
@@ -64,7 +136,7 @@
 	}
 	async function handleNegotiationNeededEvent(event,targetUsername) 
 	{
-		if(targetUsername in alreadyrecieved)
+		if(alreadyrecieved.includes(targetUsername))
 			return
 		localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints)
 		if(!hasstarted)
@@ -93,7 +165,6 @@
 	} 
 	async function handleVideoOfferMsg(msg) 
 	{
-		var localStream = null;
 		targetUsername = msg.name;
 		alreadyrecieved = [...alreadyrecieved,msg.name]
 		var desc = new RTCSessionDescription(msg.sdp);
@@ -150,6 +221,9 @@
 	}
 	function addVideoStream(stream,user_id) 
 	{
+		// console.log(user_id,videoalreadyadded,user_id in videoalreadyadded)
+		if(videoalreadyadded.includes(user_id))
+			return
 		const video = document.createElement('video')
 		video.id = user_id
 		const videoGrid = document.getElementById('video-grid')
@@ -158,5 +232,54 @@
 			video.play()
 		})
 		videoGrid.append(video)
+		videoalreadyadded = [...videoalreadyadded,user_id]
+	}
+	function muteUnmute()
+	{
+		var enabled = localStream.getAudioTracks()[0].enabled;
+		if (enabled)
+		{
+			localStream.getAudioTracks()[0].enabled = false;
+			setUnmuteButton();
+		}
+		else
+		{
+			setMuteButton();
+			localStream.getAudioTracks()[0].enabled = true;
+		}
+	}
+	function playStop()
+	{
+		var enabled = localStream.getVideoTracks()[0].enabled;
+		if (enabled)
+		{
+			localStream.getVideoTracks()[0].enabled = false;
+			setPlayVideo()
+		}
+		else
+		{
+			setStopVideo()
+			localStream.getVideoTracks()[0].enabled = true;
+		}
+	}
+	function setMuteButton()
+	{
+		const html = `<button onclick="muteUnmute()"><i class="fas fa-microphone"></i></button>`
+		document.querySelector('.main__mute_button').innerHTML = html;
+	}
+	function setUnmuteButton()
+	{
+		const html = `<button class="btn-sec" onclick="muteUnmute()"><i class="fas fa-microphone-slash"></i></button>`
+		document.querySelector('.main__mute_button').innerHTML = html;
+	}
+	function setStopVideo()
+	{
+		const html = `<button onclick="playStop()"><i class="fas fa-video"></i></button>`
+		document.querySelector('.main__video_button').innerHTML = html;
+	}
+	function setPlayVideo()
+	{
+		const html = `<button class="btn-sec" onclick="playStop()"><i class="fas fa-video-slash"></i></button>`
+		document.querySelector('.main__video_button').innerHTML = html;
 	}
 </script>

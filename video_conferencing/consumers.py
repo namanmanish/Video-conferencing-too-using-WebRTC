@@ -2,6 +2,7 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 import json
 
+
 class ConnectConsumer(WebsocketConsumer):
     def connect(self):
         # print("HERE")
@@ -11,7 +12,7 @@ class ConnectConsumer(WebsocketConsumer):
             self.room_id,
             {
                 'type': 'connection_message',
-                'obj': {'id':self.user_id,'type':1}
+                'obj': {'id': self.user_id, 'type': 1}
             }
         )
         async_to_sync(self.channel_layer.group_add)(
@@ -25,7 +26,7 @@ class ConnectConsumer(WebsocketConsumer):
             self.room_id,
             {
                 'type': 'connection_message',
-                'obj': {'id':self.user_id,'type':0}
+                'obj': {'id': self.user_id, 'type': 0}
             }
         )
         async_to_sync(self.channel_layer.group_discard)(
@@ -40,7 +41,7 @@ class ConnectConsumer(WebsocketConsumer):
             self.room_id,
             {
                 'type': 'connection_message',
-                'obj': {'id':id,'type':2}
+                'obj': {'id': id, 'type': 2}
             }
         )
 

@@ -140,6 +140,9 @@
         x.style.display = "none";
         y.style.display = "block";
 
+        var chatMessage;
+        //var chatMessage = [];
+
         var is_sharing = false
         var peers = [];
         var myVideoStream = null
@@ -210,6 +213,13 @@
                         if (element !== null)
                             element.remove()
                     }
+                    else if (data.obj.type === 3) {
+                        const data = JSON.parse(e.data);
+                        chatMessage = data.obj.message;
+                        document.querySelector('#chat-log').value += (chatMessage + '\n');
+
+
+                    }
                     else {
                         element = document.getElementById(rec_id + 's')
                         if (element !== null)
@@ -266,6 +276,24 @@
             if (x.style.display === "none") {
                 x.style.display = "block";
                 y.style.display = "none";
+
+                document.querySelector('#chat-log').value += (chatMessage + '\n');
+                document.querySelector('#chat-message-input').onkeyup = function (e) {          //enter key considered as submit button
+                    if (e.keyCode === 13) {  // enter, return
+                        document.querySelector('#chat-message-submit').click();
+                    }
+                };
+
+                document.querySelector('#chat-message-submit').onclick = function (e) {
+                    const messageInputDom = document.querySelector('#chat-message-input');
+                    const message = messageInputDom.value;
+                    socket.send(JSON.stringify({
+                        'id': user_id,
+                        'message': message,
+                        'type': 3,
+                    }));
+                    messageInputDom.value = '';
+                };
 
             }
             else {

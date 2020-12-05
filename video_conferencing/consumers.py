@@ -33,17 +33,29 @@ class ConnectConsumer(WebsocketConsumer):
             self.room_id,
             self.channel_name
         )
+# made changes here
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         id = text_data_json['id']
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_id,
-            {
-                'type': 'connection_message',
-                'obj': {'id': id, 'type': 2}
-            }
-        )
+        type = text_data_json['type']
+        message = text_data_json['message']
+        if type == 3:
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_id,
+                {
+                    'type': 'connection_message',
+                    'obj': {'id': id, 'type': 3, 'message': message}
+                }
+            )
+        else:
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_id,
+                {
+                    'type': 'connection_message',
+                    'obj': {'id': id, 'type': 2}
+                }
+            )
 
     def connection_message(self, event):
         self.send(text_data=json.dumps({

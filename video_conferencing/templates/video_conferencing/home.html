@@ -91,12 +91,13 @@
 	var conntetedpeers = {}
 	var room_id = "{{ room_id|safe }}"
 	var user_name = "{{ user_name|safe }}"
-	var endpoint = 'ws://' + window.location.host + '/ws/' + room_id + '/' + user_name + '/'
-	socket = new WebSocket(endpoint)
+	var endpoint = 'wss://' + window.location.host + '/ws/' + room_id + '/' + user_name + '/'
 	var mediaConstraints = {
 		audio: true, 
 		video: true 
 	};
+	getLocalStreamFunc()
+	socket = new WebSocket(endpoint)
 	socket.onmessage = function(e) {
 		var data = JSON.parse(e.data).obj
 		// console.log(data)
@@ -110,6 +111,11 @@
 			handleAnswerMsg(data)
 		else if(data.type === "left")
 			handleLeftMsg(data)
+	}
+	async function getLocalStreamFunc()
+	{
+		localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints)
+		addVideoStream(localStream,user_name)
 	}
 	async function invite(data)
 	{
@@ -138,10 +144,6 @@
 	{
 		if(alreadyrecieved.includes(targetUsername))
 			return
-		localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints)
-		if(!hasstarted)
-			addVideoStream(localStream,user_name)
-		hasstarted = true;
 		myPeerConnection = conntetedpeers[targetUsername][0]
 		await myPeerConnection.createOffer()
 		await myPeerConnection.setLocalDescription();
@@ -155,7 +157,7 @@
 	async function handleAnswerMsg(msg)
 	{
 		var desc = new RTCSessionDescription(msg.sdp)
-		console.log(msg)
+		// console.log(msg)
 		myPeerConnection = conntetedpeers[msg.name][0]
 		if(!!!desc)
 			return
@@ -175,9 +177,6 @@
 		candidates.forEach(candidate => myPeerConnection.addIceCandidate(candidate))
 		stream = await navigator.mediaDevices.getUserMedia(mediaConstraints)
 		localStream = stream;
-		if(!hasstarted)
-			addVideoStream(localStream,user_name)
-		hasstarted = true;
 		await localStream.getTracks().forEach(track => myPeerConnection.addTrack(track, localStream));
 		myPeerConnection = conntetedpeers[msg.name][0]
 		answer = await myPeerConnection.createAnswer();
@@ -213,6 +212,7 @@
 	}
 	function handleRemoteStreamEvent(event,user_id)
 	{
+		console.log(event)
 		addVideoStream(event.streams[0],user_id)
 	}
 	function handleLeftMsg(msg)
@@ -223,9 +223,18 @@
 	{
 		// console.log(user_id,videoalreadyadded,user_id in videoalreadyadded)
 		if(videoalreadyadded.includes(user_id))
+		{
+			const video = document.getElementById(user_id)
+			video.srcObject = stream
+			video.addEventListener('loadedmetadata', () => {
+				video.play()
+			})
 			return
+		}
 		const video = document.createElement('video')
 		video.id = user_id
+		if(user_id === user_name)
+			video.muted = true;
 		const videoGrid = document.getElementById('video-grid')
 		video.srcObject = stream
 		video.addEventListener('loadedmetadata', () => {
@@ -240,12 +249,14 @@
 		if (enabled)
 		{
 			localStream.getAudioTracks()[0].enabled = false;
+			// document.getElementById(user_name).srcObject.getAudioTracks()[0].enabled = false;
 			setUnmuteButton();
 		}
 		else
 		{
 			setMuteButton();
 			localStream.getAudioTracks()[0].enabled = true;
+			// document.getElementById(user_name).srcObject.getAudioTracks()[0].enabled = true;
 		}
 	}
 	function playStop()
@@ -254,12 +265,14 @@
 		if (enabled)
 		{
 			localStream.getVideoTracks()[0].enabled = false;
+			document.getElementById(user_name).srcObject.getVideoTracks()[0].enabled = false;
 			setPlayVideo()
 		}
 		else
 		{
 			setStopVideo()
 			localStream.getVideoTracks()[0].enabled = true;
+			document.getElementById(user_name).srcObject.getVideoTracks()[0].enabled = true;
 		}
 	}
 	function setMuteButton()

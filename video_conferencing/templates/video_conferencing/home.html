@@ -104,8 +104,8 @@
         <div id="chat-section">
         </div>
         <div id="chat-grid">
-            <textarea id="chat-log" cols="50" rows="10"></textarea><br>
-            <input id="chat-message-input" type="text" size="100"><br>
+            <textarea readonly id="chat-log" cols="25" rows="5"></textarea><br>
+            <input id="chat-message-input" type="text" size="50"><br>
             <input id="chat-message-submit" type="button" value="Send">
         </div>
         <div class="bottom-bar">
@@ -141,6 +141,7 @@
         y.style.display = "block";
 
         var chatMessage;
+        var messages = [];
         //var chatMessage = [];
 
         var is_sharing = false
@@ -213,13 +214,8 @@
                         if (element !== null)
                             element.remove()
                     }
-                    else if (data.obj.type === 3) {
-                        const data = JSON.parse(e.data);
-                        chatMessage = data.obj.message;
-                        document.querySelector('#chat-log').value += (chatMessage + '\n');
-
-
-                    }
+                    else if (data.obj.type === 3) 
+                        messagecame(data.obj.message)
                     else {
                         element = document.getElementById(rec_id + 's')
                         if (element !== null)
@@ -276,8 +272,8 @@
             if (x.style.display === "none") {
                 x.style.display = "block";
                 y.style.display = "none";
-
-                document.querySelector('#chat-log').value += (chatMessage + '\n');
+                document.querySelector('#chat-log').value = '';
+                messages.forEach(i => document.querySelector('#chat-log').value += (i + '\n'))
                 document.querySelector('#chat-message-input').onkeyup = function (e) {          //enter key considered as submit button
                     if (e.keyCode === 13) {  // enter, return
                         document.querySelector('#chat-message-submit').click();
@@ -300,6 +296,12 @@
                 x.style.display = "none";
                 y.style.display = "block";
             }
+        }
+        function messagecame(message)
+        {
+            messages = [...messages,message];
+            if(x.style.display === "block")  
+                document.querySelector('#chat-log').value += (message + '\n');
         }
         function muteUnmute() {
             var enabled = myVideoStream.getAudioTracks()[0].enabled;

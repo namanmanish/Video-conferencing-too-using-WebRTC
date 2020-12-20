@@ -127,7 +127,8 @@
     </div>
     <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
     <script>
-        var room_id = {{ room_id| safe }};
+        var room_id = "{{ room_id|safe }}"
+        var user_name = "{{ user_name|safe }}"
         const myPeer = new Peer(undefined, {
             host: 'peerwebrtc.herokuapp.com',
             port: '443',
@@ -214,8 +215,8 @@
                         if (element !== null)
                             element.remove()
                     }
-                    else if (data.obj.type === 3) 
-                        messagecame(data.obj.message)
+                    else if (data.obj.type === 3)
+                        messagecame(data.obj.message, data.obj.user_name)
                     else {
                         element = document.getElementById(rec_id + 's')
                         if (element !== null)
@@ -287,6 +288,7 @@
                         'id': user_id,
                         'message': message,
                         'type': 3,
+                        'user_name': user_name,
                     }));
                     messageInputDom.value = '';
                 };
@@ -297,10 +299,10 @@
                 y.style.display = "block";
             }
         }
-        function messagecame(message)
-        {
-            messages = [...messages,message];
-            if(x.style.display === "block")  
+        function messagecame(message, name) {
+            message = name + " : " + message;
+            messages = [...messages, message];
+            if (x.style.display === "block")
                 document.querySelector('#chat-log').value += (message + '\n');
         }
         function muteUnmute() {

@@ -41,11 +41,12 @@ class ConnectConsumer(WebsocketConsumer):
         type = text_data_json['type']
         message = text_data_json['message']
         if type == 3:
+            user_name=text_data_json['user_name']
             async_to_sync(self.channel_layer.group_send)(
                 self.room_id,
                 {
                     'type': 'connection_message',
-                    'obj': {'id': id, 'type': 3, 'message': message}
+                    'obj': {'id': id, 'type': 3, 'message': message,'user_name':user_name}
                 }
             )
         else:

@@ -119,8 +119,8 @@
                 <div style="display: inline-block;">
                     <button onclick="shareScreen()"><i class="fas fa-share"></i></button>
                 </div>
-                <div style="display: inline-block;">
-                    <button onclick="chat()"><i class="fas fa-comments"></i></button>
+                <div class="main__chat_button" style="display: inline-block;">
+                    <button onclick="chat()"><i class="fas fa-comment-slash"></i></button>
                 </div>
             </div>
         </div>
@@ -141,9 +141,8 @@
         x.style.display = "none";
         y.style.display = "block";
 
-        var chatMessage;
         var messages = [];
-        //var chatMessage = [];
+
 
         var is_sharing = false
         var peers = [];
@@ -271,12 +270,13 @@
             var x = document.getElementById("chat-grid");
             var y = document.getElementById("chat-section");
             if (x.style.display === "none") {
+                setChatButton();
                 x.style.display = "block";
                 y.style.display = "none";
                 document.querySelector('#chat-log').value = '';
                 messages.forEach(i => document.querySelector('#chat-log').value += (i + '\n'))
-                document.querySelector('#chat-message-input').onkeyup = function (e) {          //enter key considered as submit button
-                    if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-message-input').onkeyup = function (e) {          
+                    if (e.keyCode === 13) { 
                         document.querySelector('#chat-message-submit').click();
                     }
                 };
@@ -295,6 +295,7 @@
 
             }
             else {
+                unsetChatButton();
                 x.style.display = "none";
                 y.style.display = "block";
             }
@@ -320,6 +321,7 @@
             var enabled = myVideoStream.getVideoTracks()[0].enabled;
             if (enabled) {
                 myVideoStream.getVideoTracks()[0].enabled = false;
+
                 setPlayVideo()
             }
             else {
@@ -342,6 +344,14 @@
         function setPlayVideo() {
             const html = `<button class="btn-sec" onclick="playStop()"><i class="fas fa-video-slash"></i></button>`
             document.querySelector('.main__video_button').innerHTML = html;
+        }
+        function setChatButton() {
+            const html = `<button onclick="chat()"><i class="fas fa-comment"></i></button>`
+            document.querySelector('.main__chat_button').innerHTML = html;
+        }
+        function unsetChatButton() {
+            const html = `<button onclick="chat()"><i class="fas fa-comment-slash"></i></button>`
+            document.querySelector('.main__chat_button').innerHTML = html;
         }
     </script>
 </body>

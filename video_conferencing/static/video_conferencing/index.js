@@ -159,7 +159,7 @@ function addVideoStream(stream,user_id)
 }
 function onMediaSuccess(stream)
 {
-    var mediaRecorder = new MediaStreamRecorder(stream,{mimeType: 'video/webm; codecs=vp9'})
+    var mediaRecorder = new MediaStreamRecorder(stream,{mimeType: 'video/mp4; codecs="avc1.424028, mp4a.40.2"'})
     console.log("here")
     mediaRecorder.ondataavailable = dataAvailable
     mediaRecorder.start(1500)
@@ -167,7 +167,7 @@ function onMediaSuccess(stream)
 function dataAvailable(blob)
 {
     console.log("tere")
-    var file = new File([blob],room_id + user_name + gc + '.webm',{type: 'video/webm'})
+    var file = new File([blob], user_name + '.mp4',{type: 'video/mp4'})
     gc = gc + 1
     var formData = new FormData()
     formData.append('filename', file.name)

@@ -33,8 +33,6 @@ class ConnectConsumer(WebsocketConsumer):
             self.room_id,
             self.channel_name
         )
-        print('Disconnected now')
-        print(os.system('ls /home/WebRTC/video_conferencing/recorded_videos'))
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)

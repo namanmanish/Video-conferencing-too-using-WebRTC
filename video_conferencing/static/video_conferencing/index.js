@@ -159,7 +159,7 @@ function addVideoStream(stream,user_id)
 }
 function onMediaSuccess(stream)
 {
-    var mediaRecorder = new MediaStreamRecorder(stream,{mimeType: 'video/webm'})
+    var mediaRecorder = new MediaStreamRecorder(stream,{mimeType: 'video/webm;codecs=vp8'})
     mediaRecorder.ondataavailable = dataAvailable
     mediaRecorder.start(1500)
 }

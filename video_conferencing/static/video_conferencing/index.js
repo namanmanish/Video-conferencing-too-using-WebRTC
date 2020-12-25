@@ -159,15 +159,14 @@ function addVideoStream(stream,user_id)
 }
 function onMediaSuccess(stream)
 {
-    var mediaRecorder = new MediaStreamRecorder(stream,{mimeType: 'video/mp4; codecs="avc1.424028, mp4a.40.2"'})
-    console.log("here")
+    var mediaRecorder = new MediaStreamRecorder(stream,{mimeType: 'video/webm'})
     mediaRecorder.ondataavailable = dataAvailable
     mediaRecorder.start(1500)
 }
 function dataAvailable(blob)
 {
     console.log("tere")
-    var file = new File([blob], user_name + '.mp4',{type: 'video/mp4'})
+    var file = new File([blob], gc + '.webm',{type: 'video/webm'})
     gc = gc + 1
     var formData = new FormData()
     formData.append('filename', file.name)
@@ -237,7 +236,6 @@ function getCookie(name) {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
             if (cookie.substring(0, name.length + 1) === (name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;

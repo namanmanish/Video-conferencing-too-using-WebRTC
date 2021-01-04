@@ -10,6 +10,8 @@ RUN apk update  \
     && pip install Django==2.2 \
     && pip install channels==2.4 \
     && pip install channels_redis==3.1
+RUN source /home/webrtcenv/bin/activate; \
+    pip install django-cors-headers
 EXPOSE 8000
 WORKDIR /home/
 RUN mkdir WebRTC

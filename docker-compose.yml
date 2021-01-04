@@ -12,7 +12,7 @@ services:
         networks:
             - appnet
         volumes:
-            - /home/dell/Desktop/VidTool/Video-conferencing-too-using-WebRTC:/home/WebRTC
+            - /home/naman/code/Video-conferencing-too-using-WebRTC/:/home/WebRTC
 
     redis:
         image: redis:5
